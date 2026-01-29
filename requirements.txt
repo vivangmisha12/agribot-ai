@@ -1,0 +1,26 @@
+# ==========================================
+# AgriBot Backend Requirements (v2.1.0)
+# ==========================================
+
+# Core FastAPI Framework
+fastapi==0.115.0
+uvicorn==0.30.1
+
+# API Communication & HTTP Handling
+requests==2.31.0
+httpx==0.27.0
+python-multipart==0.0.9
+
+# Data Validation
+pydantic==2.7.4
+pydantic-core==2.18.4
+
+# Environment & Security
+python-dotenv==1.0.1
+starlette==0.37.2
+
+# JSON Performance
+orjson==3.10.3
+
+# Optional Fallbacks (If using Llama-3 or others via OpenRouter)
+openai==1.37.0
