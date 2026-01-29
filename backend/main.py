@@ -24,10 +24,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="AgriBot API", version="2.1.0")
-
+origins = [
+    "http://localhost:5173",
+    "https://agribottt.netlify.app",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Production mein ise specific URL kar dena
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
