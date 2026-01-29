@@ -1,0 +1,9 @@
+[build]
+  # Netlify ko force karega ki sirf Node.js/React build kare
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Isse Netlify Python ko ignore marega
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--version"
