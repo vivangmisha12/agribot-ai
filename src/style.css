@@ -6,72 +6,82 @@
   --bot-bubble: #ffffff;
   --user-bubble: #2d6a4f;
   --bg: #f0f2f5;
-  --accent: #1976d2;         /* Blue for badges */
+  --accent: #1976d2;
 }
 
-body {
+/* Base Reset */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body, html {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
   background-color: var(--bg);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #333;
-  /* Mobile fix: overflows stop karne ke liye */
-  overflow-x: hidden;
+  overflow: hidden; /* Prevent body scroll */
 }
 
+/* Main Layout Wrapper */
 .main-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  /* Mobile par height adjust karne ke liye */
-  min-height: -webkit-fill-available; 
-  padding: 10px;
-  box-sizing: border-box;
+  height: 100vh;
+  height: -webkit-fill-available; /* Mobile browser height fix */
 }
 
+/* App Container - The Box */
 .app-container {
   width: 100%;
   max-width: 500px;
-  height: 90vh;
+  height: 100%; /* Default to full height on mobile */
   background: white;
   display: flex;
-  flex-direction: column;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  flex-direction: column; /* Stack elements vertically */
   position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* --- HEADER & NAVBAR --- */
+/* Desktop adjustment */
+@media (min-width: 600px) {
+  .app-container {
+    height: 90vh;
+    border-radius: 20px;
+  }
+}
+
+/* --- HEADER --- */
 .app-header {
   background: var(--primary);
   color: white;
-  padding: 12px 15px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--primary-light);
-  flex-shrink: 0; /* Header chota na ho */
+  flex-shrink: 0; /* Header won't squash */
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .logo { font-size: 1.5rem; }
-.header-text h1 { margin: 0; font-size: 1rem; letter-spacing: 0.5px; }
-.header-text p { margin: 0; font-size: 0.7rem; opacity: 0.9; }
+.header-text h1 { margin: 0; font-size: 1.1rem; }
+.header-text p { margin: 0; font-size: 0.75rem; opacity: 0.9; }
 
 /* Language Dropdown */
 .lang-dropdown {
   background: rgba(255, 255, 255, 0.2);
-  padding: 4px 8px;
+  padding: 5px 10px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  display: flex;
-  align-items: center;
 }
 
 .lang-dropdown select {
@@ -79,25 +89,24 @@ body {
   color: white;
   border: none;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   outline: none;
-  cursor: pointer;
 }
 
-/* --- CHAT AREA --- */
+/* --- CHAT AREA (The Scrollable Part) --- */
 .chatbox {
-  flex: 1; /* Saari bachi hui jagah ye lega */
+  flex: 1; /* Key fix: Takes all available vertical space */
   overflow-y: auto;
-  padding: 15px;
+  padding: 20px;
   background: #f9fdf9;
   display: flex;
   flex-direction: column;
-  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
 .message-container {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 15px;
   animation: fadeIn 0.3s ease;
 }
@@ -109,123 +118,99 @@ body {
 
 .user-right { flex-direction: row-reverse; }
 
-.avatar { font-size: 1.3rem; display: flex; align-items: center; }
-
 .message-bubble {
   max-width: 80%;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 18px;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  word-wrap: break-word;
 }
 
 .user-msg { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
 .bot-msg { background: var(--bot-bubble); color: #333; border-bottom-left-radius: 4px; border: 1px solid #eee; }
 
-/* --- SUGGESTIONS BAR (Horizontal Scroll) --- */
+/* --- SUGGESTIONS (Horizontal Scroll) --- */
 .suggestions {
   display: flex;
   gap: 8px;
-  padding: 10px;
-  background: #fff;
+  padding: 10px 15px;
   overflow-x: auto;
   white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
+  background: #fff;
   border-top: 1px solid #f0f0f0;
   flex-shrink: 0;
 }
 
-/* Hide scrollbar for Chrome/Safari */
-.suggestions::-webkit-scrollbar { display: none; }
+.suggestions::-webkit-scrollbar { display: none; } /* Hide scrollbar */
 
 .suggestions button {
   background: var(--secondary);
   border: 1px solid var(--primary-light);
   color: var(--primary);
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 /* --- INPUT AREA --- */
 .input-area {
-  padding: 10px 15px;
+  padding: 15px;
   background: white;
   border-top: 1px solid #eee;
   flex-shrink: 0;
+  padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* iPhone fix */
 }
 
 .input-row-wrapper {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
-
-.main-input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1.5px solid #eee;
-  border-radius: 12px;
-  outline: none;
-  font-size: 16px; /* 16px prevents iOS auto-zoom */
-}
-
-.main-input:focus { border-color: var(--primary-light); }
 
 .attach-btn {
   background: #f0f4f0;
   border: none;
-  font-size: 1.2rem;
-  padding: 8px;
-  border-radius: 10px;
+  font-size: 1.3rem;
+  padding: 10px;
+  border-radius: 12px;
   cursor: pointer;
+}
+
+.main-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  outline: none;
+  font-size: 16px; /* Prevents auto-zoom on mobile */
 }
 
 .send-btn {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
   font-weight: bold;
   cursor: pointer;
 }
 
-/* --- MOBILE RESPONSIVE FIX --- */
-@media (max-width: 480px) {
-  .main-wrapper {
-    padding: 0;
-  }
-
-  .app-container {
-    height: 100vh; /* Mobile par full screen */
-    height: -webkit-fill-available;
-    border-radius: 0;
-  }
-
-  .message-bubble {
-    max-width: 85%;
-  }
-
-  .logo { font-size: 1.3rem; }
-}
-
-/* Image Preview Fix */
+/* Image Preview */
 .image-preview-container {
   display: flex;
-  padding: 5px;
-  gap: 10px;
+  padding: 8px;
   background: #f8f8f8;
   border-radius: 10px;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  position: relative;
 }
 
 .preview-thumbnail {
-  height: 50px;
-  width: 50px;
+  height: 60px;
+  width: 60px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 8px;
 }
