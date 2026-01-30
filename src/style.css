@@ -1,12 +1,22 @@
-/* --- MODERN ROOT VARIABLES --- */
+/* ==========================================================================
+   AGRIBOT - RESPONSIVE MOBILE-FIRST CSS
+   ========================================================================== */
+
+/* --- ROOT VARIABLES --- */
 :root {
   --primary: #1b5e20;
   --primary-light: #4caf50;
+  --primary-dark: #0d3d13;
   --secondary: #d8f3dc;
   --bot-bubble: #ffffff;
   --user-bubble: #2d6a4f;
   --bg: #f0f2f5;
   --accent: #558b2f;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
 }
 
 /* --- GLOBAL RESET --- */
@@ -17,141 +27,712 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Body fix for all devices */
+/* --- BASE LAYOUT (MOBILE FIRST) --- */
 body, html {
-  height: 100%;
-  width: 100%;
+  height: 100dvh;
+  width: 100vw;
   margin: 0;
-  background-color: var(--bg);
-  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
   overflow: hidden;
+  position: fixed;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Main Wrapper - Centers content on larger screens */
 .main-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100dvh;
   width: 100%;
+  padding: 0;
 }
 
-/* --- RESPONSIVE CONTAINER --- */
+/* App Container - Responsive sizing */
 .app-container {
   width: 100%;
   height: 100dvh;
+  max-width: 100%;
   background: white;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  box-shadow: none;
 }
 
-/* PC/Laptop ke liye width fix (Agar screen 600px se badi hai) */
-@media (min-width: 600px) {
-  .app-container {
-    max-width: 450px;
-    height: 90vh; /* PC par thoda gap dikhega toh sundar lagega */
-    border-radius: 20px;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.2);
-  }
-}
-
-/* --- HEADER --- */
+/* ==========================================================================
+   HEADER - FIXED AT TOP
+   ========================================================================== */
 .app-header {
   flex-shrink: 0;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  padding: 10px 15px;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
+  border-bottom: 2px solid var(--primary-light);
   z-index: 100;
+  min-height: 60px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-/* --- CHAT AREA & BUBBLE FIX --- */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.logo {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.header-text p {
+  margin: 0;
+  font-size: 0.7rem;
+  opacity: 0.9;
+  font-weight: 300;
+}
+
+/* Language Dropdown */
+.lang-dropdown {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: var(--transition);
+}
+
+.lang-dropdown:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.lang-dropdown select {
+  background: transparent;
+  color: white;
+  border: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.lang-dropdown option {
+  color: #000;
+  background: #fff;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   CHAT AREA - SCROLLABLE
+   ========================================================================== */
 .chatbox {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
-  background: #f9fdf9;
+  overflow-x: hidden;
+  padding: 16px;
+  background: linear-gradient(to bottom, #fafdfb 0%, #f5f9f6 100%);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 14px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) transparent;
 }
 
-/* FIX: User message alignment (Right side wala masla) */
+.chatbox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatbox::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 10px;
+}
+
+/* Message Containers */
 .message-container {
   display: flex;
+  gap: 10px;
   width: 100%;
+  margin-bottom: 8px;
+  animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .user-right {
-  justify-content: flex-end; /* Mobile par bubbles ko right mein push karega */
+  flex-direction: row-reverse;
 }
 
-.bot-left {
-  justify-content: flex-start; /* Bot ko left mein rakhega */
+/* Avatar styling (optional enhancement) */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  background: var(--secondary);
+  box-shadow: var(--shadow-sm);
 }
 
+/* Message Bubbles */
 .message-bubble {
   max-width: 80%;
   padding: 12px 16px;
   border-radius: 18px;
   font-size: 0.95rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
   word-wrap: break-word;
+  line-height: 1.6;
+  transition: var(--transition);
 }
 
-/* User bubble adjustment */
+.message-bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
 .user-msg {
-  background: var(--user-bubble);
+  background: linear-gradient(135deg, var(--user-bubble) 0%, #1e5738 100%);
   color: white;
   border-bottom-right-radius: 4px;
-  margin-right: 5px; /* Border se chipakne se rokta hai */
 }
 
-/* Bot bubble adjustment */
 .bot-msg {
   background: var(--bot-bubble);
   color: #333;
-  border: 1px solid #eee;
+  border: 1px solid #e8f5e9;
   border-bottom-left-radius: 4px;
-  margin-left: 5px;
 }
 
-/* --- INPUT AREA FIX --- */
+/* Markdown styling in bot messages */
+.bot-msg h2, .bot-msg h3 {
+  margin-top: 12px;
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.bot-msg h2 {
+  font-size: 1.1rem;
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: 4px;
+}
+
+.bot-msg ul, .bot-msg ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.bot-msg li {
+  margin: 4px 0;
+}
+
+.bot-msg strong {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.bot-msg code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+/* Action Chips */
+.action-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 10px 42px;
+  width: calc(100% - 52px);
+}
+
+.chip-btn {
+  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+  border: 1.5px solid var(--accent);
+  color: var(--primary-dark);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.chip-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.chip-btn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   BOTTOM SECTION - FIXED AT BOTTOM
+   ========================================================================== */
 .bottom-section-wrapper {
   flex-shrink: 0;
   background: white;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e0e0e0;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
 }
 
-.input-area { padding: 10px 15px 15px; }
+/* Suggestions */
+.suggestions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.suggestions::-webkit-scrollbar {
+  display: none;
+}
+
+.suggestions button {
+  background: var(--secondary);
+  border: 1.5px solid var(--primary-light);
+  color: var(--primary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.suggestions button:hover {
+  background: var(--primary-light);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.suggestions button:active {
+  transform: translateY(0);
+}
+
+/* Input Area */
+.input-area {
+  padding: 8px 16px 16px 16px;
+}
 
 .input-row-wrapper {
   display: flex;
   gap: 10px;
-  align-items: stretch; /* Button aur input ki height same rahegi */
+  align-items: flex-end;
 }
 
-.main-input {
-  flex: 1;
-  padding: 12px;
-  border: 1.5px solid #eee;
+/* Attach Button */
+.attach-btn {
+  background: #f0f4f0;
+  border: 1.5px solid #ddd;
+  padding: 10px;
   border-radius: 12px;
-  font-size: 16px;
-  outline: none;
-}
-
-.send-btn {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0 20px;
-  border-radius: 12px;
-  font-weight: bold;
-  cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.attach-btn:hover {
+  background: var(--secondary);
+  border-color: var(--primary-light);
+  transform: scale(1.05);
+}
+
+.attach-btn:active {
+  transform: scale(0.95);
+}
+
+/* Main Input */
+.main-input {
+  flex: 1;
+  padding: 14px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: var(--border-radius);
+  font-size: 16px; /* Prevents iOS zoom */
+  outline: none;
+  font-family: inherit;
+  resize: none;
+  max-height: 120px;
+  transition: var(--transition);
+  background: #fafafa;
+}
+
+.main-input:focus {
+  border-color: var(--primary-light);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.main-input::placeholder {
+  color: #999;
+}
+
+/* Send Button */
+.send-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 12px 18px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.send-btn:hover {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.send-btn:active {
+  transform: translateY(0);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================================================
+   LOADING & STATUS INDICATORS
+   ========================================================================== */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bot-bubble);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: typing 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   TABLET RESPONSIVENESS (768px - 1024px)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .main-wrapper {
+    padding: 20px;
+  }
+
+  .app-container {
+    max-width: 700px;
+    height: calc(100dvh - 40px);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .app-header {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 16px 24px;
+  }
+
+  .header-text h1 {
+    font-size: 1.3rem;
+  }
+
+  .header-text p {
+    font-size: 0.8rem;
+  }
+
+  .logo {
+    font-size: 1.8rem;
+  }
+
+  .chatbox {
+    padding: 24px;
+    gap: 16px;
+  }
+
+  .message-bubble {
+    max-width: 75%;
+    padding: 14px 18px;
+    font-size: 1rem;
+  }
+
+  .action-chips-container {
+    margin-left: 48px;
+    width: calc(100% - 58px);
+  }
+
+  .chip-btn {
+    padding: 7px 16px;
+    font-size: 0.85rem;
+  }
+
+  .suggestions {
+    padding: 12px 24px;
+  }
+
+  .suggestions button {
+    padding: 9px 18px;
+    font-size: 0.9rem;
+  }
+
+  .input-area {
+    padding: 12px 24px 20px 24px;
+  }
+
+  .main-input {
+    font-size: 1rem;
+    padding: 16px 18px;
+  }
+
+  .send-btn {
+    padding: 14px 22px;
+    min-width: 60px;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP RESPONSIVENESS (1024px+)
+   ========================================================================== */
+@media (min-width: 1024px) {
+  .main-wrapper {
+    padding: 30px;
+  }
+
+  .app-container {
+    max-width: 900px;
+    height: calc(100dvh - 60px);
+    border-radius: 24px;
+  }
+
+  .app-header {
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 18px 30px;
+    min-height: 70px;
+  }
+
+  .header-text h1 {
+    font-size: 1.4rem;
+  }
+
+  .header-text p {
+    font-size: 0.85rem;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .chatbox {
+    padding: 30px;
+    gap: 18px;
+  }
+
+  .message-bubble {
+    max-width: 70%;
+    padding: 16px 20px;
+    font-size: 1.05rem;
+  }
+
+  .bot-msg h2 {
+    font-size: 1.2rem;
+  }
+
+  .bot-msg h3 {
+    font-size: 1.05rem;
+  }
+
+  .action-chips-container {
+    margin-left: 52px;
+    width: calc(100% - 62px);
+  }
+
+  .suggestions {
+    padding: 14px 30px;
+    gap: 10px;
+  }
+
+  .suggestions button {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+
+  .input-area {
+    padding: 14px 30px 24px 30px;
+  }
+
+  .input-row-wrapper {
+    gap: 12px;
+  }
+
+  .main-input {
+    font-size: 1.05rem;
+    padding: 16px 20px;
+  }
+
+  .send-btn {
+    padding: 16px 24px;
+    min-width: 70px;
+  }
+}
+
+/* ==========================================================================
+   LARGE DESKTOP (1440px+)
+   ========================================================================== */
+@media (min-width: 1440px) {
+  .app-container {
+    max-width: 1000px;
+  }
+}
+
+/* ==========================================================================
+   DARK MODE SUPPORT (Optional)
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a1a;
+    --bot-bubble: #2d2d2d;
+  }
+
+  body, html {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+  }
+
+  .app-container {
+    background: #1e1e1e;
+  }
+
+  .chatbox {
+    background: linear-gradient(to bottom, #1e1e1e 0%, #1a1a1a 100%);
+  }
+
+  .bot-msg {
+    background: var(--bot-bubble);
+    color: #e0e0e0;
+    border-color: #3a3a3a;
+  }
+
+  .main-input {
+    background: #2d2d2d;
+    color: #e0e0e0;
+    border-color: #3a3a3a;
+  }
+
+  .main-input:focus {
+    background: #333;
+  }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .message-bubble {
+    border: 2px solid currentColor;
+  }
+
+  .user-msg {
+    border-color: white;
+  }
+
+  .bot-msg {
+    border-color: #333;
+  }
 }
