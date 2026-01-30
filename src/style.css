@@ -17,14 +17,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Mobile browser bounce aur scrolling fix */
 body, html {
-  height: 100dvh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   width: 100vw;
   margin: 0;
   background-color: var(--bg);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #333;
   overflow: hidden; 
-  position: fixed; /* Taaki mobile pull-to-refresh layout na bigade */
+  position: fixed; /* Extra safety for mobile browsers */
 }
 
 .main-wrapper {
@@ -40,14 +42,16 @@ body, html {
   max-width: 500px;
   height: 100dvh;
   background: white;
-  display: grid; /* Flex ki jagah Grid use kar rahe hain for 100% stability */
-  grid-template-rows: auto 1fr auto; /* Header, Chat (flexible), Footer */
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  position: relative;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* --- HEADER --- */
+/* --- HEADER: FIXED AT TOP --- */
 .app-header {
+  flex-shrink: 0; /* Isse header gayab nahi hoga */
   background: var(--primary);
   color: white;
   padding: 10px 15px;
@@ -55,70 +59,86 @@ body, html {
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--primary-light);
+  z-index: 100;
   height: 60px;
-  z-index: 10;
 }
 
 .header-left { display: flex; align-items: center; gap: 10px; }
 .logo { font-size: 1.4rem; }
-.header-text h1 { margin: 0; font-size: 1.05rem; }
+.header-text h1 { margin: 0; font-size: 1.05rem; letter-spacing: 0.5px; }
 .header-text p { margin: 0; font-size: 0.65rem; opacity: 0.9; }
 
 /* Language Dropdown */
+.lang-dropdown {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
 .lang-dropdown select {
   background: transparent;
   color: white;
   border: none;
   font-weight: 600;
+  font-size: 0.8rem;
   outline: none;
 }
+.lang-dropdown option { color: #000; background: #fff; }
 
-/* --- CHAT AREA (SCROLLABLE) --- */
+/* --- CHAT AREA: SCROLLABLE --- */
 .chatbox {
-  overflow-y: auto; /* Sirf ye portion scroll hoga */
+  flex: 1; /* Baaki bachi jagah ye lega */
+  overflow-y: auto; /* Scroll sirf yahan hoga */
   padding: 15px;
   background: #f9fdf9;
   display: flex;
   flex-direction: column;
   gap: 12px;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth; /* Auto-scroll ke liye zaroori */
 }
 
 /* Message Bubbles */
-.message-container { display: flex; gap: 10px; width: 100%; }
+.message-container { display: flex; gap: 10px; width: 100%; margin-bottom: 5px; }
 .user-right { flex-direction: row-reverse; }
 
 .message-bubble {
-  max-width: 80%;
+  max-width: 85%;
   padding: 12px 14px;
   border-radius: 18px;
   font-size: 0.92rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   word-wrap: break-word;
+  line-height: 1.5;
 }
 .user-msg { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
 .bot-msg { background: var(--bot-bubble); color: #333; border: 1px solid #eee; border-bottom-left-radius: 4px; }
 
-/* Action Chips */
+/* Action Chips Inside Chat */
 .action-chips-container {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 5px 0 10px 45px;
+  width: calc(100% - 60px);
 }
 .chip-btn {
   background: #f1f8e9;
   border: 1px solid #558b2f;
+  color: #333;
   padding: 5px 12px;
   border-radius: 4px;
   font-size: 0.78rem;
+  font-weight: 500;
 }
 
-/* --- BOTTOM SECTION (FIXED) --- */
+/* --- BOTTOM SECTION: FIXED AT BOTTOM --- */
 .bottom-section-wrapper {
+  flex-shrink: 0; /* Input area compress nahi hoga */
   background: white;
   border-top: 1px solid #eee;
-  padding-bottom: env(safe-area-inset-bottom);
+  width: 100%;
+  z-index: 10;
 }
 
 .suggestions {
@@ -136,25 +156,18 @@ body, html {
   padding: 6px 14px;
   border-radius: 20px;
   white-space: nowrap;
+  font-size: 0.8rem;
 }
 
 .input-area { padding: 5px 12px 12px 12px; }
-
-/* Alignment Fix for Input & Send Button */
-.input-row-wrapper {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end; /* Taaki lamba text likhne par bhi button niche na bhage */
-}
+.input-row-wrapper { display: flex; gap: 8px; align-items: center; }
 
 .attach-btn {
   background: #f0f4f0;
   border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 12px;
-  height: 48px; /* Fixed height */
+  padding: 8px;
+  border-radius: 10px;
   display: flex;
-  align-items: center;
 }
 
 .main-input {
@@ -162,22 +175,15 @@ body, html {
   padding: 12px;
   border: 1.5px solid #eee;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 16px; /* 16px prevents iOS auto-zoom */
   outline: none;
-  min-height: 48px;
-  max-height: 120px; /* Text badhne par input bada hoga but button fix rahega */
 }
 
 .send-btn {
   background: var(--primary);
   color: white;
-  height: 48px; /* Input ki height ke barabar */
-  padding: 0 20px;
-  border-radius: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-weight: bold;
   border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
