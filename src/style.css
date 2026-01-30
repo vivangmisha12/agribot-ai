@@ -46,9 +46,9 @@ body, html {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* --- HEADER --- */
+/* --- HEADER (FIXED FOR MOBILE) --- */
 .app-header {
-  flex-shrink: 0;
+  flex-shrink: 0; /* Header ko chota hone se rokta hai */
   background: var(--primary);
   color: white;
   padding: 12px 15px;
@@ -56,7 +56,9 @@ body, html {
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid var(--primary-light);
-  z-index: 10;
+  z-index: 100; /* Isse header hamesha upar rahega */
+  width: 100%;
+  min-height: 60px; /* Mobile par visibility ensure karne ke liye */
 }
 
 .header-left { display: flex; align-items: center; gap: 10px; }
@@ -103,43 +105,57 @@ body, html {
 .user-right { flex-direction: row-reverse; }
 
 .message-bubble {
-  max-width: 80%;
-  padding: 12px 16px;
+  max-width: 85%; 
+  padding: 12px 14px;
   border-radius: 18px;
   font-size: 0.95rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  /* Text break fixes */
   word-wrap: break-word; 
   overflow-wrap: break-word;
-  word-break: break-word;
+  word-break: normal;
+  line-height: 1.5;
 }
 
 .user-msg { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
 .bot-msg { background: var(--bot-bubble); color: #333; border: 1px solid #eee; border-bottom-left-radius: 4px; }
 
-/* FIXED: ACTION CHIPS Olive UI */
+/* List fix */
+.message-bubble ul, .message-bubble ol {
+  padding-left: 20px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.message-bubble li {
+  margin-bottom: 5px;
+  word-wrap: break-word;
+}
+
+/* --- ACTION CHIPS Olive UI --- */
 .action-chips-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 10px 0 15px 45px; /* Aligned with bot avatar space */
+  gap: 6px;
+  margin: 8px 0 15px 45px;
+  width: calc(100% - 60px);
 }
 
 .chip-btn {
-  background: #ffffff;
-  border: 1.5px solid var(--accent);
-  color: var(--accent);
-  padding: 6px 14px;
-  border-radius: 20px;
+  background: #f1f8e9;
+  border: 1px solid #558b2f;
+  color: #333;
+  padding: 5px 12px;
+  border-radius: 4px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .chip-btn:hover {
-  background: var(--accent);
-  color: white;
+  background: #e1edda;
 }
 
 /* --- BOTTOM SECTION --- */
@@ -204,63 +220,4 @@ body, html {
   padding: 12px 18px;
   border-radius: 12px;
   font-weight: bold;
-}
-/* --- FIXED CHAT BUBBLE & LIST ALIGNMENT --- */
-.message-bubble {
-  max-width: 85%; /* Thoda space badhaya */
-  padding: 12px 14px;
-  border-radius: 18px;
-  font-size: 0.95rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  
-  /* Critical Fixes for text overflow */
-  word-wrap: break-word; 
-  overflow-wrap: break-word;
-  word-break: normal; /* Normal rakha taaki words be-wajah na toot-te */
-  line-height: 1.5;
-}
-
-/* List (Bullet points) fix: Taki wo bubble ke bahar na nikle */
-.message-bubble ul, .message-bubble ol {
-  padding-left: 20px; /* Space inside the bubble */
-  margin: 8px 0;
-  width: 100%;
-}
-
-.message-bubble li {
-  margin-bottom: 5px;
-  word-wrap: break-word;
-}
-
-/* --- FIXED ACTION CHIPS (Olive Green Style) --- */
-.action-chips-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 8px 0 15px 45px; /* Bot avatar ke alignment mein */
-  width: calc(100% - 60px); /* Taki chips screen ke bahar na jayein */
-}
-
-.chip-btn {
-  background: #f1f8e9; /* Light Olive background */
-  border: 1px solid #558b2f; /* Olive border */
-  color: #333; /* Darker text for readability */
-  padding: 5px 12px;
-  border-radius: 4px; /* Squared-pill look as per screenshot */
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.chip-btn:hover {
-  background: #e1edda;
-}
-
-/* --- DROPDOWN FIX --- */
-.lang-dropdown option {
-  color: #000000 !important;
-  background-color: #ffffff !important;
 }
