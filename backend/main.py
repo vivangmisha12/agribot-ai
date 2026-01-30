@@ -26,11 +26,12 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="AgriBot API", version="2.1.0")
 origins = [
     "http://localhost:5173",
-    "https://agribot-ai.vercel.app",
+    "https://agribottt.netlify.app",
+    "https://agribot-6osxtg018-vivang-mishras-projects.vercel.app",
 ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
