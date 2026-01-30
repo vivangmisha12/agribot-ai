@@ -67,9 +67,24 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
     system_message = {
         "role": "system",
         "content": (
-            "You are AgriBot, an expert Senior Agronomist. "
-            "Analyze images for diseases, give dosage for fertilizers/pesticides, "
-            "and always use Markdown formatting. Keep advice practical and scannable."
+        "You are 'AgriBot Pro', a world-class Senior Agronomist and Plant Pathologist. "
+        "Your goal is to provide scientific, accurate, and highly detailed farming advice. "
+        
+        "1. IMAGE ANALYSIS: When an image is provided, perform a deep visual inspection. "
+        "Identify the crop type, detect specific pests (insects/fungus/bacteria), and recognize nutrient deficiencies (like Nitrogen or Zinc lack). "
+        "Explain the 'Symptoms' you see in the image (e.g., yellow spots, wilted edges, powdery residue). "
+
+        "2. DETAILED SOLUTIONS: For any problem, provide a three-tier solution: "
+        "   - Cultural/Preventive: Natural ways to stop it from spreading. "
+        "   - Organic/Biological: Natural fertilizers or bio-pesticides. "
+        "   - Chemical: Specific pesticide/fertilizer names with exact dosage (e.g., 2ml per Liter) and application method. "
+
+        "3. FARMING QUERIES: If asked about farming techniques (like Irrigation, Soil health, or Crop rotation), "
+        "provide deep technical insights including ideal pH levels, temperature requirements, and modern methods like Drip Irrigation. "
+
+        "4. FORMATTING: Always use Markdown. Use **Bold Headings**, > Blockquotes for warnings, "
+        "and tables if comparing multiple solutions. Keep the tone helpful and professional. "
+        "Response Language: Always reply in the language requested by the user."
         )
     }
     
@@ -83,7 +98,13 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
     if image_url:
         user_content = [
             {"type": "text", "text": user_message},
-            {"type": "image_url", "image_url": {"url": image_url}}
+            {
+                "type": "image_url", 
+                "image_url": {
+                    "url": image_url,
+                    "detail": "low"  # Essential for Render Free Tier stability
+                }
+            }
         ]
     else:
         user_content = user_message
@@ -98,21 +119,21 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
     }
 
     # Model Fallback Logic
-    models = ["google/gemini-flash-1.5", "meta-llama/llama-3.1-8b-instruct"]
+    models = ["google/gemini-flash-1.5", "anthropic/claude-3-haiku", "meta-llama/llama-3.1-8b-instruct"]
     
     for model in models:
         try:
             payload = {
                 "model": model,
                 "messages": messages,
-                "max_tokens": 1000,
-                "temperature": 0.5
+                "max_tokens": 800,
+                "temperature": 0.4
             }
             response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 data=json.dumps(payload),
-                timeout=30
+                timeout=90
             )
             
             if response.status_code == 200:
@@ -121,7 +142,7 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
                 
                 # Precise Costing
                 tokens = result.get("usage", {}).get("total_tokens", 0)
-                msg_cost = tokens * 0.00000015 # Gemini Flash rate
+                msg_cost = tokens * 0.00000015
                 total_cost += msg_cost
                 
                 return reply, False, None, msg_cost
@@ -133,42 +154,52 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
     return "Server overloaded. Try again.", True, "api_error", 0.0
 
 # ============================================================================
-# STEP 4: Endpoints
+# STEP 4: Endpoints (Final Clean Version)
 # ============================================================================
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
-    user_text = req.query.strip()
-    if not user_text:
+    # original_query ko save karenge history ke liye
+    original_query = req.query.strip()
+    
+    # Logic for Image-only query
+    if not original_query and req.image_url:
+        processed_query = "Please analyze this image in detail and identify any problems."
+    elif not original_query:
         raise HTTPException(status_code=400, detail="Empty query")
+    else:
+        processed_query = original_query
 
-    # Force Language via System Prompt
-    language_prompt = f"\n\nIMPORTANT: Use {req.language} for the entire response."
+    # AI Instructions (history mein save nahi karenge)
+    prompt_modifier = ""
+    if req.image_url:
+        prompt_modifier = "\n[Instruction: Perform a deep visual inspection of this plant image.]"
+
+    language_prompt = f"\n\nIMPORTANT: Respond entirely and strictly in {req.language}."
+    
+    # AI ko bhejne wali final string
+    final_query_for_ai = processed_query + prompt_modifier + language_prompt
     
     reply_text, is_error, err_type, cost = get_openrouter_response(
-        user_text + language_prompt, 
+        final_query_for_ai, 
         req.image_url
     )
 
     if not is_error:
-        conversation_history.append({"user": user_text, "bot": reply_text})
-        if len(conversation_history) > 20: conversation_history.pop(0)
+        # History mein sirf original text save karo taaki context clean rahe
+        conversation_history.append({
+            "user": original_query if original_query else "Sent an image", 
+            "bot": reply_text
+        })
+        if len(conversation_history) > 20: 
+            conversation_history.pop(0)
 
     return ChatResponse(reply=reply_text, error=is_error, error_type=err_type, cost=cost)
 
+# Isse stats endpoint bhi zinda rahega
 @app.get("/api/stats")
 def get_stats():
     return {
         "total_cost_usd": f"${total_cost:.6f}",
         "session_messages": len(conversation_history)
     }
-
-@app.post("/api/clear-history")
-def clear_history():
-    global conversation_history
-    conversation_history = []
-    return {"status": "cleared"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
