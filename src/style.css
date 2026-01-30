@@ -17,16 +17,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Mobile browser bounce aur scrolling fix */
 body, html {
-  height: 100dvh; /* Dynamic viewport height for mobile */
+  height: 100dvh;
   width: 100vw;
   margin: 0;
   background-color: var(--bg);
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #333;
   overflow: hidden; 
-  position: fixed; /* Extra safety for mobile browsers */
+  position: fixed;
 }
 
 .main-wrapper {
@@ -49,9 +48,9 @@ body, html {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-/* --- HEADER: FIXED AT TOP --- */
+/* --- HEADER (FIXED) --- */
 .app-header {
-  flex-shrink: 0; /* Isse header gayab nahi hoga */
+  flex-shrink: 0;
   background: var(--primary);
   color: white;
   padding: 10px 15px;
@@ -68,7 +67,6 @@ body, html {
 .header-text h1 { margin: 0; font-size: 1.05rem; letter-spacing: 0.5px; }
 .header-text p { margin: 0; font-size: 0.65rem; opacity: 0.9; }
 
-/* Language Dropdown */
 .lang-dropdown {
   background: rgba(255, 255, 255, 0.2);
   padding: 4px 8px;
@@ -85,20 +83,19 @@ body, html {
 }
 .lang-dropdown option { color: #000; background: #fff; }
 
-/* --- CHAT AREA: SCROLLABLE --- */
+/* --- CHAT AREA (SCROLLABLE) --- */
 .chatbox {
-  flex: 1; /* Baaki bachi jagah ye lega */
-  overflow-y: auto; /* Scroll sirf yahan hoga */
+  flex: 1;
+  overflow-y: auto;
   padding: 15px;
   background: #f9fdf9;
   display: flex;
   flex-direction: column;
   gap: 12px;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth; /* Auto-scroll ke liye zaroori */
+  scroll-behavior: smooth;
 }
 
-/* Message Bubbles */
 .message-container { display: flex; gap: 10px; width: 100%; margin-bottom: 5px; }
 .user-right { flex-direction: row-reverse; }
 
@@ -114,7 +111,7 @@ body, html {
 .user-msg { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
 .bot-msg { background: var(--bot-bubble); color: #333; border: 1px solid #eee; border-bottom-left-radius: 4px; }
 
-/* Action Chips Inside Chat */
+/* Action Chips */
 .action-chips-container {
   display: flex;
   flex-wrap: wrap;
@@ -132,13 +129,14 @@ body, html {
   font-weight: 500;
 }
 
-/* --- BOTTOM SECTION: FIXED AT BOTTOM --- */
+/* --- BOTTOM SECTION: THE SEND BUTTON FIX --- */
 .bottom-section-wrapper {
-  flex-shrink: 0; /* Input area compress nahi hoga */
+  flex-shrink: 0;
   background: white;
   border-top: 1px solid #eee;
   width: 100%;
   z-index: 10;
+  padding-bottom: env(safe-area-inset-bottom); /* iOS notch safety */
 }
 
 .suggestions {
@@ -160,14 +158,22 @@ body, html {
 }
 
 .input-area { padding: 5px 12px 12px 12px; }
-.input-row-wrapper { display: flex; gap: 8px; align-items: center; }
+
+/* FIX: Alignment logic for Send Button */
+.input-row-wrapper { 
+  display: flex; 
+  gap: 8px; 
+  align-items: stretch; /* Taki input aur button ki height match kare */
+}
 
 .attach-btn {
   background: #f0f4f0;
   border: 1px solid #ddd;
-  padding: 8px;
-  border-radius: 10px;
+  padding: 0 12px; /* Adjusted */
+  border-radius: 12px;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-input {
@@ -175,15 +181,26 @@ body, html {
   padding: 12px;
   border: 1.5px solid #eee;
   border-radius: 12px;
-  font-size: 16px; /* 16px prevents iOS auto-zoom */
+  font-size: 16px;
   outline: none;
+  min-height: 45px;
 }
 
 .send-btn {
   background: var(--primary);
   color: white;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 0 18px; /* Padding side se di hai height flex handle karega */
+  border-radius: 12px;
   font-weight: bold;
   border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px; /* Input se match karne ke liye */
+}
+
+.send-btn:active {
+  background: var(--primary-light);
+  transform: scale(0.98);
 }
