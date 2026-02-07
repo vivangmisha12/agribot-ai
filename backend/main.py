@@ -95,15 +95,12 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
         messages.append({"role": "assistant", "content": exchange["bot"]})
     
     # Current User Content
-    if image_url:
+    if image_url and image_url.startswith("data:image"):
         user_content = [
             {"type": "text", "text": user_message},
             {
                 "type": "image_url", 
-                "image_url": {
-                    "url": image_url,
-                    "detail": "low"  # Essential for Render Free Tier stability
-                }
+                "image_url": {"url": image_url} # Removed 'detail:low' as some models bug out on it
             }
         ]
     else:
@@ -114,44 +111,44 @@ def get_openrouter_response(user_message: str, image_url: Optional[str] = None) 
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": SITE_URL,
+        "HTTP-Referer": "https://agribot-6osxtg018-vivang-mishras-projects.vercel.app",
         "X-Title": SITE_NAME,
     }
 
     # Model Fallback Logic
-    models = ["google/gemini-flash-1.5", "anthropic/claude-3-haiku", "meta-llama/llama-3.1-8b-instruct"]
+    models = ["google/gemini-2.0-flash-001", "google/gemini-flash-1.5-8b", "openai/gpt-4o-mini", "anthropic/claude-3-haiku", "meta-llama/llama-3.1-8b-instruct"]
     
     for model in models:
         try:
             payload = {
                 "model": model,
-                "messages": messages,
-                "max_tokens": 800,
+                "messages": messages + [{"role": "user", "content": user_content}],
+                "max_tokens": 1000,
                 "temperature": 0.4
             }
             response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
-                data=json.dumps(payload),
-                timeout=90
+                json=payload,
+                timeout=45
             )
             
             if response.status_code == 200:
                 result = response.json()
-                reply = result["choices"][0]["message"]["content"]
-                
-                # Precise Costing
-                tokens = result.get("usage", {}).get("total_tokens", 0)
-                msg_cost = tokens * 0.00000015
-                total_cost += msg_cost
-                
-                return reply, False, None, msg_cost
-            
+                if "choices" in result:
+                    reply = result["choices"][0]["message"]["content"]
+                    tokens = result.get("usage", {}).get("total_tokens", 0)
+                    msg_cost = tokens * 0.00000015
+                    total_cost += msg_cost
+                    return reply, False, None, msg_cost
+            # LOG THE ACTUAL ERROR TO RENDER CONSOLE
+            logger.error(f"Model {model} failed with status {response.status_code}: {response.text}")
+
         except Exception as e:
             logger.error(f"Error with {model}: {e}")
             continue
 
-    return "Server overloaded. Try again.", True, "api_error", 0.0
+    return "Server overloaded or API Key exhausted. Check Render Logs.", True, "api_error", 0.0
 
 # ============================================================================
 # STEP 4: Endpoints (Final Clean Version)
