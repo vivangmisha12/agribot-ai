@@ -317,7 +317,7 @@ const App = () => {
         },
         body: JSON.stringify({
           query: messageText,
-          image_url: base64Image || "string",
+          image_url: base64Image || null,
           language: selectedLang
         }),
       });
