@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChatBox from "./components/ChatBox";
+import ScrollView from "./components/ScrollView";
 import { FaBars, FaTimes, FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -10,13 +11,13 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [selectedLang, setSelectedLang] = useState("Hindi");
-  const [base64Image, setBase64Image] = useState(""); 
+  const [base64Image, setBase64Image] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Sidebar States
-  const [chats, setChats] = useState([]); 
+  const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Refs
@@ -25,7 +26,7 @@ const App = () => {
 
   // Language Configuration
   const languages = ["Hindi", "English", "Punjabi", "Marathi", "Telugu", "Bhojpuri", "Gujarati"];
-  
+
   // Translations
   const translations = {
     Hindi: {
@@ -165,29 +166,12 @@ const App = () => {
 
   const t = translations[selectedLang] || translations.English;
 
-  // Auto-scroll to bottom
-  useEffect(() => {
-    if (chatboxRef.current) {
-      chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
-    }
-  }, [messages]);
+  // Auto-scroll is now handled by ScrollView component
 
   // Fetch chat history on mount
   useEffect(() => {
     fetchChatHistory();
   }, []);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && isSidebarOpen) {
-        setSidebarOpen(false);
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isSidebarOpen]);
 
   // API Functions
   const fetchChatHistory = async () => {
@@ -200,42 +184,28 @@ const App = () => {
     }
   };
 
-  const startNewChat = async () => {
-    try {
-      const res = await axios.post('https://agribot-ai-hwff.onrender.com/api/chats', { 
-        language: selectedLang 
-      });
-      
-      setChats(prev => [res.data, ...prev]);
-      setActiveChatId(res.data._id);
-      setMessages([]);
-      setSearchQuery("");
-      
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      }
-    } catch (error) {
-      console.error("Failed to create new chat:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Could not create new chat',
-        timer: 2000,
-        showConfirmButton: false
-      });
+  const startNewChat = () => {
+    setActiveChatId(null);
+    setMessages([]);
+    setSearchQuery("");
+    setInput("");
+    setBase64Image("");
+
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
     }
   };
 
   const loadChat = async (id) => {
     if (id === activeChatId) return;
-    
+
     setActiveChatId(id);
     setIsLoading(true);
-    
+
     try {
       const res = await axios.get(`https://agribot-ai-hwff.onrender.com/api/chats/${id}/messages`);
       setMessages(res.data || []);
-      
+
       if (window.innerWidth < 768) {
         setSidebarOpen(false);
       }
@@ -260,7 +230,7 @@ const App = () => {
       weather: "मौसम की जानकारी दें",
       crop: "पैदावार कैसे बढ़ाएं?"
     };
-    
+
     setInput(prompts[action] || "");
     setTimeout(() => {
       document.querySelector('.chat-input')?.focus();
@@ -273,9 +243,9 @@ const App = () => {
 
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'File Too Large', 
+      Swal.fire({
+        icon: 'error',
+        title: 'File Too Large',
         text: 'Maximum file size is 10MB',
         timer: 3000,
         showConfirmButton: false
@@ -298,7 +268,7 @@ const App = () => {
         setBase64Image(canvas.toDataURL("image/jpeg", 0.7));
       };
     };
-    
+
     e.target.value = null;
   };
 
@@ -310,86 +280,88 @@ const App = () => {
     let currentId = activeChatId;
 
     try {
-        // 1. Create chat if it doesn't exist (Backend logic check)
-        if (!currentId) {
-            try {
-                const chatRes = await axios.post('https://agribot-ai-hwff.onrender.com/api/chats', { 
-                    language: selectedLang,
-                    title: messageText.substring(0, 30) + (messageText.length > 30 ? "..." : "") 
-                });
-                currentId = chatRes.data._id;
-                setActiveChatId(currentId);
-                setChats(prev => [chatRes.data, ...prev]);
-            } catch (err) {
-                console.warn("Chat creation failed, proceeding with direct chat...");
-            }
+      // 1. Create chat if it doesn't exist (Backend logic check)
+      if (!currentId) {
+        try {
+          const chatRes = await axios.post('https://agribot-ai-hwff.onrender.com/api/chats', {
+            language: selectedLang,
+            title: messageText.substring(0, 30) + (messageText.length > 30 ? "..." : "")
+          });
+          currentId = chatRes.data._id;
+          setActiveChatId(currentId);
+          setChats(prev => [chatRes.data, ...prev]);
+        } catch (err) {
+          console.warn("Chat creation failed, proceeding with direct chat...");
         }
+      }
 
-        // 2. UI update (User side)
-        const userMsg = { 
-            sender: "user", 
-            text: messageText, 
-            image: base64Image,
-            timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, userMsg]);
-        setInput(""); 
-        setBase64Image("");
+      // 2. UI update (User side)
+      const userMsg = {
+        sender: "user",
+        text: messageText,
+        image: base64Image,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, userMsg]);
+      setInput("");
+      setBase64Image("");
 
-        // 3. API Call (Updated to match your Swagger/Curl Docs)
-        const response = await fetch("https://agribot-ai-hwff.onrender.com/api/chat", { // Endpoint changed to /api/chat
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json",
-                "accept": "application/json"
-            },
-            body: JSON.stringify({ 
-                query: messageText,              // Field changed from 'content' to 'query'
-                image_url: base64Image || "string", // Match swagger default
-                language: selectedLang 
-            }),
-        });
+      // 3. API Call
+      // Note: If your backend supports saving messages to a specific chat ID, you should include currentId here.
+      // For now, we assume this endpoint just answers the query.
+      const response = await fetch("https://agribot-ai-hwff.onrender.com/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "accept": "application/json"
+        },
+        body: JSON.stringify({
+          query: messageText,
+          image_url: base64Image || "string",
+          language: selectedLang
+        }),
+      });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        // 4. Handle Server Overload or Success
-        const botMsg = {
-            sender: "bot",
-            // data.reply is used as per your curl response example
-            text: data.reply || (data.error ? "Server is busy." : "No response from AI."), 
-            timestamp: new Date().toISOString()
-        };
-        
-        setMessages(prev => [...prev, botMsg]);
+      // 4. Handle Server Overload or Success
+      const botMsg = {
+        sender: "bot",
+        // data.reply is used as per your curl response example
+        text: data.reply || (data.error ? "Server is busy." : "No response from AI."),
+        timestamp: new Date().toISOString()
+      };
 
-        // Optional: Refresh history if applicable
-        if (typeof fetchChatHistory === 'function') fetchChatHistory();
+      setMessages(prev => [...prev, botMsg]);
+
+      // Optional: Refresh history if applicable
+      if (typeof fetchChatHistory === 'function') fetchChatHistory();
 
     } catch (error) {
-        console.error("Send error details:", error);
-        
-        setMessages(prev => [...prev, { 
-            sender: "bot", 
-            text: "❌ Connection error! Server is not responding properly.",
-            error: true,
-            timestamp: new Date().toISOString()
-        }]);
-        
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Connection Error',
-                text: 'Backend is not reachable or overloaded.',
-                timer: 3000,
-                showConfirmButton: false
-            });
-        }
+      console.error("Send error details:", error);
+
+      setMessages(prev => [...prev, {
+        sender: "bot",
+        text: "❌ Connection error! Server is not responding properly.",
+        error: true,
+        timestamp: new Date().toISOString()
+      }]);
+
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Connection Error',
+          text: 'Backend is not reachable or overloaded.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      }
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -400,7 +372,7 @@ const App = () => {
     }
   };
 
-  const filteredChats = chats.filter(chat => 
+  const filteredChats = chats.filter(chat =>
     chat.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -416,8 +388,8 @@ const App = () => {
               <span>{t.aiAssistant}</span>
             </div>
           </div>
-          <button 
-            className="close-sidebar" 
+          <button
+            className="close-sidebar"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sidebar"
           >
@@ -425,8 +397,8 @@ const App = () => {
           </button>
         </div>
 
-        <button 
-          className="new-chat-btn" 
+        <button
+          className="new-chat-btn"
           onClick={startNewChat}
           aria-label={t.newChat}
         >
@@ -436,8 +408,8 @@ const App = () => {
 
         <div className="sidebar-search">
           <FaSearch />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -460,8 +432,8 @@ const App = () => {
           )}
 
           {filteredChats.map((chat) => (
-            <div 
-              key={chat._id} 
+            <div
+              key={chat._id}
               className={`chat-item ${activeChatId === chat._id ? "active" : ""}`}
               onClick={() => loadChat(chat._id)}
               role="button"
@@ -485,8 +457,8 @@ const App = () => {
       </aside>
 
       {isSidebarOpen && (
-        <div 
-          className="overlay" 
+        <div
+          className="overlay"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close sidebar"
         />
@@ -497,8 +469,8 @@ const App = () => {
         {/* HEADER */}
         <header className="app-header">
           <div className="header-left">
-            <button 
-              className="menu-btn" 
+            <button
+              className="menu-btn"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open menu"
             >
@@ -516,8 +488,8 @@ const App = () => {
           <div className="header-right">
             <div className="language-selector">
               <span className="lang-icon">🌐</span>
-              <select 
-                value={selectedLang} 
+              <select
+                value={selectedLang}
                 onChange={(e) => setSelectedLang(e.target.value)}
                 aria-label="Select language"
               >
@@ -530,7 +502,11 @@ const App = () => {
         </header>
 
         {/* CHAT AREA */}
-        <div className="chat-container" ref={chatboxRef}>
+        <ScrollView
+          className="chat-container"
+          autoScroll={true}
+          dependency={[messages, isLoading]}
+        >
           {messages.length === 0 ? (
             <div className="welcome-screen">
               <div className="welcome-content">
@@ -545,35 +521,35 @@ const App = () => {
                 <div className="quick-actions">
                   <h3>{t.quickActions}</h3>
                   <div className="action-grid">
-                    <button 
+                    <button
                       className="action-card"
                       onClick={() => fileInputRef.current.click()}
                     >
                       <div className="action-icon scan">📸</div>
                       <span>{t.scanImage}</span>
                     </button>
-                    <button 
+                    <button
                       className="action-card"
                       onClick={() => handleQuickAction('pest')}
                     >
                       <div className="action-icon pest">🐛</div>
                       <span>{t.pestControl}</span>
                     </button>
-                    <button 
+                    <button
                       className="action-card"
                       onClick={() => handleQuickAction('fertilizer')}
                     >
                       <div className="action-icon fertilizer">🌱</div>
                       <span>{t.fertilizer}</span>
                     </button>
-                    <button 
+                    <button
                       className="action-card"
                       onClick={() => handleQuickAction('weather')}
                     >
                       <div className="action-icon weather">☁️</div>
                       <span>{t.weather}</span>
                     </button>
-                    <button 
+                    <button
                       className="action-card"
                       onClick={() => handleQuickAction('crop')}
                     >
@@ -585,17 +561,21 @@ const App = () => {
               </div>
             </div>
           ) : (
-            <ChatBox messages={messages} isTyping={isLoading} />
+            <ChatBox
+              messages={messages}
+              isTyping={isLoading}
+              onActionClick={(val) => handleSend(val)}
+            />
           )}
-        </div>
+        </ScrollView>
 
         {/* INPUT AREA */}
         <div className="input-container">
           {base64Image && (
             <div className="image-preview">
               <img src={base64Image} alt="Upload preview" />
-              <button 
-                className="remove-image" 
+              <button
+                className="remove-image"
                 onClick={() => setBase64Image("")}
                 aria-label="Remove image"
               >
@@ -603,34 +583,34 @@ const App = () => {
               </button>
             </div>
           )}
-          
+
           <div className="input-wrapper">
-            <button 
-              className="attach-btn" 
+            <button
+              className="attach-btn"
               onClick={() => fileInputRef.current.click()}
               aria-label="Attach image"
             >
               📎
             </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleImageChange} 
-              accept="image/*" 
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
               style={{ display: "none" }}
             />
-            <input 
-              className="chat-input" 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)} 
+            <input
+              className="chat-input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={t.placeholder}
               disabled={isLoading}
               aria-label="Message input"
             />
-            <button 
-              className="send-btn" 
-              onClick={() => handleSend()} 
+            <button
+              className="send-btn"
+              onClick={() => handleSend()}
               disabled={isLoading || (!input.trim() && !base64Image)}
               aria-label="Send message"
             >
@@ -638,7 +618,7 @@ const App = () => {
                 <span className="loading-spinner"></span>
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
             </button>
