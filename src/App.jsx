@@ -506,6 +506,7 @@ const App = () => {
           className="chat-container"
           autoScroll={true}
           dependency={[messages, isLoading]}
+          onRefresh={() => window.location.reload()} // Simple reload for now
         >
           {messages.length === 0 ? (
             <div className="welcome-screen">
